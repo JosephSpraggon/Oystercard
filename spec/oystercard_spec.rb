@@ -1,15 +1,15 @@
 require 'oystercard'
 
 describe Oystercard do
-    let(:topped_up_card) {Oystercard.new(20)}
-    subject{describe_class.new}
+    let(:topped_up_card) { Oystercard.new(20) }
+
     it 'has a default balance of zero' do
         expect(subject.balance).to eq 0
     end
 
     it 'increases balance by 20 when we top_up 20' do
         expect(topped_up_card.balance).to eq 20
-    end 
+    end
 
     it 'increases balance by 30 when we top_up 30' do
         topped_up_card.top_up(10)
@@ -27,5 +27,7 @@ describe Oystercard do
         expect{topped_up_card.top_up(1)}.to raise_error "Top up limit reached"
     end
 
-
+    it 'deducts money from card' do
+      expect{topped_up_card.deduct(5)}.to change{ topped_up_card.balance}.by(-5)
+    end
 end
