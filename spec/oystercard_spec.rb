@@ -30,4 +30,19 @@ describe Oystercard do
     it 'deducts money from card' do
       expect{topped_up_card.deduct(5)}.to change{ topped_up_card.balance}.by(-5)
     end
+
+    it 'tells us if we are on a journey' do
+        expect(subject).not_to be_in_journey
+    end
+
+    it 'start our journey' do
+        subject.touch_in
+        expect(subject).to be_in_journey
+    end
+
+    it 'ends our journey' do
+        subject.touch_out
+        expect(subject).to_not be_in_journey
+    end
+    
 end
