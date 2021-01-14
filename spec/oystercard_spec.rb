@@ -3,10 +3,15 @@ require 'oystercard'
 describe Oystercard do
   subject { described_class.new }
   let(:topped_up_card) { Oystercard.new(Oystercard::MAX_BALANCE) }
-  let(:station) { double("oxford_street") }
+  let(:entry_station) { double("oxford_street") }
+  let(:exit_station) { double('Sevenoaks') }
 
     it 'has a default balance of zero' do
         expect(subject.balance).to eq Oystercard::DEFAULT_BALANCE
+    end
+
+    it 'has an empty list of journeys by default' do
+      expect(subject.journey_history).to be_empty
     end
 
   context 'Balance' do
@@ -25,22 +30,23 @@ describe Oystercard do
     end
 
     it 'start our journey' do
-        topped_up_card.touch_in(station)
+        topped_up_card.touch_in(entry_station)
         expect(topped_up_card).to be_in_journey
     end
 
     it 'ends our journey' do
-        subject.touch_out
-        expect(subject).to_not be_in_journey
+        topped_up_card.touch_in(entry_station)
+        topped_up_card.touch_out(exit_station)
+        expect(topped_up_card).to_not be_in_journey
     end
 
     it 'raises an error when insufficent funds' do
-      expect{subject.touch_in(station)}.to raise_error "Insufficent funds"
+      expect{subject.touch_in(entry_station)}.to raise_error "Insufficent funds"
     end
 
     it 'charges for a journey when we touch out' do
-        topped_up_card.touch_in(station)
-        expect{topped_up_card.touch_out}.to change{topped_up_card.balance}.by(-Oystercard::MIN_FARE)
+        topped_up_card.touch_in(entry_station)
+        expect{topped_up_card.touch_out(exit_station)}.to change{topped_up_card.balance}.by(-Oystercard::MIN_FARE)
     end
 
     it 'touch_in method accepts an argument' do
@@ -48,8 +54,22 @@ describe Oystercard do
     end
 
     it 'touch_in method stores station name on card' do
-        station = double("oxford_street")
-        expect{topped_up_card.touch_in(station)}.to change{topped_up_card.entry_station}.to(station)
+        entry_station = double("oxford_street")
+        expect{topped_up_card.touch_in(entry_station)}.to change{topped_up_card.entry_station}.to(entry_station)
     end
 
+    context 'when completing a journey' do
+      let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
+      before do
+        topped_up_card.touch_in(entry_station)
+        topped_up_card.touch_out(exit_station)
+      end
+      it 'stores last journey' do
+        expect(topped_up_card.last_journey).to eq journey
+      end
+
+      it 'should add a journey to the list' do
+        expect(topped_up_card.journey_history).to include journey
+      end
+    end
 end
