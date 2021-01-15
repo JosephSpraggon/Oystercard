@@ -8,6 +8,7 @@ class Oystercard
         @balance = balance
         @entry_station = nil
         @journey_history = []
+        @journey = Journey.new(entry_station)
     end
 
     def top_up(amount)
@@ -16,7 +17,7 @@ class Oystercard
     end
 
     def in_journey?
-      !(@entry_station == nil)
+      @journey.in_journey?
     end
 
     def touch_in(entry_station)
